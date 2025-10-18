@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Employee Management Dashboard</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.2/dist/sweetalert2.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --background-light: #f8f9fa;
+        }
+        body {
+            background-color: var(--background-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* Navigation Bar Enhancement */
+        .navbar-custom {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand, .navbar-brand i {
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+        /* Main Content Card */
+        .main-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            min-height: 700px;
+        }
+        /* Table Styling */
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            vertical-align: middle;
+            font-weight: 600;
+            padding: 1rem;
+        }
+        .table-action-icons i {
+            cursor: pointer;
+            margin-right: 1rem;
+            transition: color 0.2s ease-in-out;
+        }
+        .table-action-icons .bi-pencil-square:hover {
+            color: var(--primary-color) !important;
+            transform: scale(1.1);
+        }
+        .table-action-icons .bi-trash2:hover {
+            color: #dc3545 !important;
+            transform: scale(1.1);
+        }
+        /* Modal Header Accent */
+        .modal-header {
+            background-color: #e9ecef;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        /* Footer Styling */
+        footer {
+            background-color: #343a40 !important;
+            padding: 1.5rem 0;
+            color: white;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+	<header class="mb-5 sticky-top">
+	    <nav class="navbar navbar-expand-lg navbar-custom">
+	        <div class="container-fluid container">
+	            <a href="#" class="navbar-brand">
+	                <i class="bi bi-person-badge-fill me-2 fs-4"></i>
+	                <span class="d-none d-sm-inline">Employee System</span>
+	            </a>
+	        </div>
+	    </nav>
+	</header>
+	
+	<div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <h1 class="h3 text-dark fw-bold">
+                <i class="bi bi-speedometer2 me-2 text-primary"></i> Employee Dashboard
+            </h1>
+            <button type="button" class="btn btn-success btn-lg shadow-sm" onclick="triggerAddEmployee()">
+                <i class="bi bi-person-plus-fill me-1"></i> Add New Employee
+            </button>
+        </div>
+        
+	    <div class="card main-card">
+			<div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>No.</th> <th>Name</th>
+                                <th>Start Date</th>
+                                <th>Status</th>
+                                <th>Salary</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listingTable">
+                            </tbody>
+                    </table>
+                </div>
+			</div>
+		</div>
+	</div>
+	
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+				<div class="modal-header">
+				    <h5 class="modal-title" id="addEmployeeModalLabel">
+                        <i class="bi bi-person-add me-2 text-primary"></i> Register New Employee
+                    </h5>
+				    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="addEmployeeName" placeholder="Enter the name" required>
+                        <label for="addEmployeeName">Employee Name</label>
+                    </div>
+					<div class="form-floating mb-3">
+						<input type="date" class="form-control" id="addEmployeeDoj" required>
+                        <label for="addEmployeeDoj">Date of Joining (DOJ)</label>
+				     </div>
+					<div class="form-floating mb-3">
+						<select class="form-select" id="addEmployeeStatus" aria-label="Employee Status" required>
+						    <option selected disabled>Please Set Employee Status</option>
+							<option value="1">Active</option>
+						    <option value="0">Retired</option>
+						</select>
+                        <label for="addEmployeeStatus">Employee Status</label>
+					 </div>
+					 <div class="form-floating mb-4">
+					 	<input type="text" class="form-control" id="addEmployeeSalary" placeholder="Enter the Salary" required>
+                        <label for="addEmployeeSalary">Employee Salary</label>
+					 </div>
+				</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary shadow-sm" onclick="triggerSaveEmployee()">
+                        <i class="bi bi-save me-1"></i> Save Employee
+                    </button>
+                </div>
+			</div>
+		</div>
+	</div>
+
+    <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+				    <h5 class="modal-title" id="editEmployeeModalLabel">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i> Edit Employee Details
+                    </h5>
+				    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="editEmployeeName" placeholder="Enter the name" required>
+                        <label for="editEmployeeName">Employee Name</label>
+                    </div>
+					<div class="form-floating mb-3">
+						<input type="date" class="form-control" id="editEmployeeDoj" required>
+                        <label for="editEmployeeDoj">Date of Joining (DOJ)</label>
+				     </div>
+					<div class="form-floating mb-3">
+						<select class="form-select" id="editEmployeeStatus" aria-label="Employee Status" required>
+						    <option selected disabled>Please Set Employee Status</option>
+						    <option value="1">Active</option>
+						    <option value="0">Retired</option>
+						</select>
+                        <label for="editEmployeeStatus">Employee Status</label>
+					 </div>
+					 <div class="form-floating mb-4">
+					 	<input type="text" class="form-control" id="editEmployeeSalary" placeholder="Enter the Salary" required>
+                        <label for="editEmployeeSalary">Employee Salary</label>
+					 </div>
+					 <input type="hidden" id="editEmployeeId">
+				</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary shadow-sm" onclick="triggerUpdateEmployee()">
+                        <i class="bi bi-arrow-repeat me-1"></i> Update Details
+                    </button>
+                </div>
+			</div>
+		</div>
+	</div>				
+    
+	<footer class="mt-5">
+	    <div class="container">
+	        <div class="row">
+	            <div class="text-white text-center">
+	                <p class="mb-0">Employee Management System | All Rights Reserved &copy; 2023</p>
+	            </div>
+	        </div>
+	    </div>
+	</footer>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.2/dist/sweetalert2.all.min.js"></script>
+	<script>
+		loadEmployees();
+		function loadEmployees(){
+			$.ajax({
+							type:"get",
+							url:"http://localhost:8082/api/employee",
+							contentType:"application/json",
+							dataType:"json",
+							
+							success:function(data){
+								var html = "";
+								for(var i=0;i<data.length;i++){
+								  var badge = data[i]['status']=="1"?"bg-success":"bg-secondary";
+								  var status = data[i]['status']=="1"?"Active":"Retired";
+								  html += "<tr>"+
+								  "<td>"+(i + 1)+"</td>"+ // FIX: Displaying row index (i + 1)
+								  "<td>"+data[i]['name']+"</td>"+
+								  "<td>"+data[i]['doj']+"</td>"+
+								  "<td><span class=\"badge rounded-pill "+badge+"\"><span class=\"text-white\">"+status+"</span></span></td>"+
+								  "<td>"+data[i]['salary']+"</td>"+
+								  "<td class=\"text-center table-action-icons\">"+
+								  "<i class=\"bi bi-pencil-square text-secondary fs-5\" onclick=\"triggerEditEmployee("+data[i]['id']+")\"></i>"+
+								  "<i class=\"bi bi-trash2 text-secondary fs-5\" onclick=\"triggerDeleteEmployee("+data[i]['id']+")\"></i>"+
+								  "</td>"+
+								  "</tr>";
+								}
+								$("#listingTable").html(html);
+							},
+							error:function(){
+								Swal.fire('Error!','Something Wrong','error')
+							}
+						});
+		}
+		
+	    function triggerAddEmployee(){
+	        $("#addEmployeeModal").modal('show');
+	    }
+		
+		function triggerSaveEmployee(){
+			var name = $("#addEmployeeName").val();
+			var doj = $("#addEmployeeDoj").val();
+			var status = $("#addEmployeeStatus").val();
+			var salary = $("#addEmployeeSalary").val();
+			
+			$.ajax({
+				type:"post",
+				url:"http://localhost:8082/api/employee",
+				contentType:"application/json",
+				dataType:"json",
+				data:JSON.stringify({"name":name,"doj":doj,"status":status,"salary":salary}),
+				
+				success:function(){
+					Swal.fire('Saved!','Employee has been Saved Successfully!','success')
+					loadEmployees();
+				},
+				error:function(){
+					Swal.fire('Error!','Something Went Wrong','error')
+				}
+			});
+			$("#addEmployeeModal").modal('hide');
+			       
+			    }
+	    function triggerEditEmployee(id){
+			$.ajax({
+				type:"get",
+				url:"http://localhost:8082/api/employee/"+id,
+				contentType:"application/json",
+				dataType:"json",
+														
+				success:function(data){
+				var date= new Date(data.doj);
+				$("#editEmployeeName").val(data.name);
+				$("#editEmployeeDoj").val(date.toISOString().substring(0,10));
+				$("#editEmployeeStatus").val(data.status);
+				$("#editEmployeeSalary").val(data.salary);
+				$("#editEmployeeId").val(data.id);
+				$("#editEmployeeModal").modal('show');
+				
+														
+				},
+				error:function(){
+				Swal.fire('Error!','Something Went Wrong','error')
+				}
+			});
+	    }
+		function triggerUpdateEmployee(){
+			var name = $("#editEmployeeName").val();
+			var doj = $("#editEmployeeDoj").val();
+			var status = $("#editEmployeeStatus").val();
+			var salary = $("#editEmployeeSalary").val();
+			var id = $("#editEmployeeId").val();			
+						$.ajax({
+							type:"put",
+							url:"http://localhost:8082/api/employee/"+id,
+							contentType:"application/json",
+							dataType:"json",
+							data:JSON.stringify({"name":name,"doj":doj,"status":status,"salary":salary}),
+							
+							success:function(){
+								Swal.fire("Updated!", 'Employee has been Updated Successfully!', 'success')
+								loadEmployees();        
+							},
+							error:function(){
+								Swal.fire('Error!','Something Went Wrong','error')
+							}
+						});
+						$("#editEmployeeModal").modal('hide');
+					      
+					    }
+	    function triggerDeleteEmployee(id){
+			Swal.fire({ 
+				title:"Are you sure?",
+				text:"You cannot reverse this operation",
+				icon:"warning",
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: "Proceed"
+			}).then((result)=>{
+				if(result.isConfirmed){
+					$.ajax({
+									type:"delete",
+									url:"http://localhost:8082/api/employee/"+id,
+									contentType:"application/json",
+									dataType:"json",
+																			
+									error:function(data){
+										console.log(data)
+										Swal.fire("Deleted!", 'Employee has been Deleted Successfully!', 'success')		
+										loadEmployees();  					
+									}
+									
+								});
+				}
+			})
+	    }
+		
+	</script>
+</body>
+</html>
